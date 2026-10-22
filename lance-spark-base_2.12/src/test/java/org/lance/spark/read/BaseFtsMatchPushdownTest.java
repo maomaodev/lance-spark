@@ -49,14 +49,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 public abstract class BaseFtsMatchPushdownTest {
 
-  @org.junit.jupiter.api.BeforeEach
-  void skipUntilNamespaceStructuredQuerySupported() {
-    // Namespace-configured FTS routes to queryTable, which ignores structured_query until
-    // lance-core dir.rs adds structured support. Skip until the lance-core bump, or migrate to a
-    // path-based table to exercise the local scan path.
-    org.junit.jupiter.api.Assumptions.assumeTrue(false);
-  }
-
   protected SparkSession spark;
   protected String catalogName = "lance_fts_test";
   protected String tableName;
@@ -86,6 +78,9 @@ public abstract class BaseFtsMatchPushdownTest {
             .config("spark.sql.defaultCatalog", catalogName)
             // Disable AQE to keep plan inspection simple
             .config("spark.sql.adaptive.enabled", "false")
+            // Force the local per-fragment FTS scan path even though the dir namespace overrides
+            // queryTable, mirroring a REST namespace whose server lacks the /query endpoint.
+            .config("spark.sql.lance.search.fts_local.enabled", "true")
             .getOrCreate();
 
     tableName = "fts_test_" + UUID.randomUUID().toString().replace("-", "");

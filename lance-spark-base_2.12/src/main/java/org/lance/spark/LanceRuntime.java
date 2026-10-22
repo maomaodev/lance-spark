@@ -78,6 +78,10 @@ public final class LanceRuntime {
   /** Spark configuration key that enables Lance OpenTelemetry metrics in each JVM. */
   public static final String SPARK_CONF_OPEN_TELEMETRY_ENABLED = "spark.lance.otel.enabled";
 
+  /** Spark configuration key that runs full-text search locally in Spark. */
+  public static final String SPARK_CONF_FTS_LOCAL_ENABLED =
+      "spark.sql.lance.search.fts_local.enabled";
+
   /** Environment variable fallback for enabling Lance OpenTelemetry metrics in each JVM. */
   public static final String ENV_OPEN_TELEMETRY_ENABLED = "LANCE_SPARK_OTEL_ENABLED";
 
@@ -162,6 +166,16 @@ public final class LanceRuntime {
       return false;
     }
     return QUERY_TABLE_SUPPORT.computeIfAbsent(namespaceImpl, LanceRuntime::probeQueryTable);
+  }
+
+  /**
+   * Returns whether full-text search runs locally in Spark instead of the namespace {@code
+   * queryTable} endpoint, per {@value #SPARK_CONF_FTS_LOCAL_ENABLED}.
+   */
+  public static boolean ftsLocalEnabled() {
+    SparkEnv sparkEnv = SparkEnv.get();
+    return sparkEnv != null
+        && Boolean.parseBoolean(sparkEnv.conf().get(SPARK_CONF_FTS_LOCAL_ENABLED, "false"));
   }
 
   private static boolean probeQueryTable(String namespaceImpl) {
