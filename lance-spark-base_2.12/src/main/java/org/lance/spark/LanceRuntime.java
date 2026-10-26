@@ -23,6 +23,7 @@ import io.opentelemetry.api.metrics.MeterProvider;
 import org.apache.arrow.memory.BufferAllocator;
 import org.apache.arrow.memory.RootAllocator;
 import org.apache.spark.SparkEnv;
+import org.apache.spark.sql.SparkSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -170,12 +171,14 @@ public final class LanceRuntime {
 
   /**
    * Returns whether full-text search runs locally in Spark instead of the namespace {@code
-   * queryTable} endpoint, per {@value #SPARK_CONF_FTS_LOCAL_ENABLED}.
+   * queryTable} endpoint, per {@value #SPARK_CONF_FTS_LOCAL_ENABLED}. Read from the active session
+   * so both builder configs and runtime {@code SET} take effect, matching how {@code
+   * spark.sql.lance.search.distributed.enabled} is read.
    */
   public static boolean ftsLocalEnabled() {
-    SparkEnv sparkEnv = SparkEnv.get();
-    return sparkEnv != null
-        && Boolean.parseBoolean(sparkEnv.conf().get(SPARK_CONF_FTS_LOCAL_ENABLED, "false"));
+    SparkSession sparkSession = SparkSession.getActiveSession();
+    return sparkSession != null
+        && Boolean.parseBoolean(sparkSession.conf().get(SPARK_CONF_FTS_LOCAL_ENABLED, "false"));
   }
 
   private static boolean probeQueryTable(String namespaceImpl) {
