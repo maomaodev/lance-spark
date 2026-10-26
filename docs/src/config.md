@@ -106,10 +106,6 @@ Set `spark.sql.lance.search.fts_local.enabled=true` to run full-text search (the
 function) locally in Spark instead of dispatching it to the namespace server's `queryTable`
 endpoint. The default is `false`.
 
-```
-spark.sql.lance.search.fts_local.enabled=true
-```
-
 Enable it when the namespace's *server* does not implement the `/query` endpoint — for example a
 metadata-only catalog exposed through the REST protocol — because such a server answers `404`
 and the query fails.
