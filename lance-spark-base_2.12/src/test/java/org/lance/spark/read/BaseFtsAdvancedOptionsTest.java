@@ -85,7 +85,6 @@ public abstract class BaseFtsAdvancedOptionsTest {
             .config("spark.sql.catalog." + catalogName + ".single_level_ns", "true")
             .config("spark.sql.defaultCatalog", catalogName)
             .config("spark.sql.adaptive.enabled", "false")
-            .config("spark.sql.lance.search.fts_local.enabled", "true")
             .getOrCreate();
 
     tableName = "adv_fts_" + UUID.randomUUID().toString().replace("-", "");

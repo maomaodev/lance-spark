@@ -74,7 +74,6 @@ public abstract class BaseFtsPhraseMatchPushdownTest {
             .config("spark.sql.catalog." + catalogName + ".single_level_ns", "true")
             .config("spark.sql.defaultCatalog", catalogName)
             .config("spark.sql.adaptive.enabled", "false")
-            .config("spark.sql.lance.search.fts_local.enabled", "true")
             .getOrCreate();
 
     tableName = "phrase_test_" + UUID.randomUUID().toString().replace("-", "");

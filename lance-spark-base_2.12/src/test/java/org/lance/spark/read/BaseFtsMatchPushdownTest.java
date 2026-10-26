@@ -78,9 +78,6 @@ public abstract class BaseFtsMatchPushdownTest {
             .config("spark.sql.defaultCatalog", catalogName)
             // Disable AQE to keep plan inspection simple
             .config("spark.sql.adaptive.enabled", "false")
-            // Force the local per-fragment FTS scan path even though the dir namespace overrides
-            // queryTable, mirroring a REST namespace whose server lacks the /query endpoint.
-            .config("spark.sql.lance.search.fts_local.enabled", "true")
             .getOrCreate();
 
     tableName = "fts_test_" + UUID.randomUUID().toString().replace("-", "");
