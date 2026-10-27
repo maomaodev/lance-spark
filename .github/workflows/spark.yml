@@ -17,6 +17,7 @@ on:
   push:
     branches:
       - main
+      - 'fts-local-*'
     paths-ignore:
       - 'docs/**'
       - 'README.md'
