@@ -17,6 +17,7 @@ on:
   push:
     branches:
       - main
+      - lance-894-new
     paths-ignore:
       - 'docs/**'
       - 'README.md'

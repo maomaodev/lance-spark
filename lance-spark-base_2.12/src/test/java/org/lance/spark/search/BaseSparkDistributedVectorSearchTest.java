@@ -283,6 +283,40 @@ public abstract class BaseSparkDistributedVectorSearchTest {
         "the two pages must not repeat a row: " + combined);
   }
 
+  @Test
+  void distributedRoutingSurvivesViewAnalysis() {
+    String brokenCatalog = "lance_dist_broken";
+    spark
+        .conf()
+        .set("spark.sql.catalog." + brokenCatalog, "org.lance.spark.LanceNamespaceSparkCatalog");
+    spark
+        .conf()
+        .set(
+            "spark.sql.catalog." + brokenCatalog + ".impl",
+            QueryUnavailableNamespace.class.getName());
+    spark
+        .conf()
+        .set("spark.sql.catalog." + brokenCatalog + ".root", tempDir.resolve("broken").toString());
+
+    String table = brokenCatalog + ".default.dist_vec_view";
+    spark.sql(String.format("CREATE NAMESPACE %s.default", brokenCatalog));
+    spark.sql(
+        String.format(
+            "CREATE TABLE %s (id INT NOT NULL, vector ARRAY<FLOAT> NOT NULL) USING lance "
+                + "TBLPROPERTIES ('vector.arrow.fixed-size-list.size' = '2')",
+            table));
+    spark.sql(
+        String.format("INSERT INTO %s VALUES (1, array(0.1, 0.2)), (2, array(0.3, 0.4))", table));
+    spark.conf().set(LanceSparkSQLProperties.SEARCH_DISTRIBUTED_ENABLED, "true");
+    spark.sql(
+        String.format(
+            "CREATE TEMP VIEW vec_view AS "
+                + "SELECT id, _distance FROM VECTOR_SEARCH('%s', array(0.1, 0.2), 2)",
+            table));
+    List<Row> rows = spark.sql("SELECT id FROM vec_view ORDER BY id").collectAsList();
+    assertEquals(2, rows.size(), "VECTOR_SEARCH inside a view must keep the distributed route");
+  }
+
   private List<Integer> idsOf(String sql) {
     List<Integer> ids = new ArrayList<>();
     for (Row row : spark.sql(sql).collectAsList()) {
